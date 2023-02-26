@@ -1,38 +1,67 @@
-import tkinter as tk
+import tkinter
+import random
+from tkinter import PhotoImage
 
-def move_by_keys(event):
-    info_coords = canvas.coords(lines)
-    x = info_coords[0]
-    y = info_coords[1]
-    label.config(text=str(x) + "                     " + str(y))
+
+def prepare_and_start():
+    global player
+
+    canvas.delete("a11")
+    player_pos = (random.randint(1, N_Y - 1) * step,
+                  random.randint(1, N_Y - 1) * step)
+    player = canvas.create_image(
+        (player_pos[0], player_pos[1]), image=player_pic, anchor="nw")
+    label.config(text="найди выход!")
+    master.bind("<KeyPress>", key_pressed)
+
+
+def move_wrap(obj, move_x, move_y):
+    xy = canvas.coords(obj)
+    canvas.move(obj, move_x, move_y)
+    print(xy)
+    if xy[0] <= 0:
+        canvas.move(obj, WIDTH, 0)
+    if xy[0] >= WIDTH:
+        canvas.move(obj, -WIDTH, 0)
+    if xy[1] <= 0:
+        canvas.move(obj, 0, HEIGHT)
+    if xy[1] >= HEIGHT:
+        canvas.move(obj, 0, -HEIGHT)
+
+
+def key_pressed(event):
     if event.keysym == "w":
-        canvas.move(lines, 0, -20)
+        move_wrap(player, 0, -step)
     elif event.keysym == "s":
-        canvas.move(lines, 0, 20)
-    elif event.keysym == "a":
-        canvas.move(lines, -20, 0)
+        move_wrap(player, 0, step)
+    elif event.keysym == 'a':
+        move_wrap(player, -step, 0)
     elif event.keysym == "d":
-        canvas.move(lines, 20, 0)
+        move_wrap(player, step, 0)
 
 
-win = tk.Tk()
-label = tk.Label(win, text="Celestial Recode")
+master = tkinter.Tk()
+
+step = 32
+N_X = 10
+N_Y = 10
+WIDTH = step * N_Y
+HEIGHT = step * N_Y
+a = False
+player_pic = tkinter.PhotoImage(file=r"doctor.png")
+
+canvas = tkinter.Canvas(master, bg="#FCAB08",
+                        width=WIDTH, height=HEIGHT)
+
+player_pos = (random.randint(0, N_Y - 1) * step,
+              random.randint(0, N_Y - 1) * step)
+print(player_pos)
+label = tkinter.Label(master, text="не попадись!")
+restart = tkinter.Button(master, text="начать заново",
+                         command=prepare_and_start)
+restart.pack()
 label.pack()
-canvas = tk.Canvas(win, bg="#fff", width=400, height=400)
-canvas.create_line((50,0), (50, 400), fill="black")
-canvas.create_line((100,0), (100, 400), fill="black")
-canvas.create_line((150,0), (150, 400), fill="black")
-canvas.create_line((200,0), (200, 400), fill="black")
-canvas.create_line((250,0), (250, 400), fill="black")
-canvas.create_line((300,0), (300, 400), fill="black")
-canvas.create_line((350,0), (350, 400), fill="black")
-canvas.create_line((50,0), (50, 50), fill="black")
-canvas.create_line((100,0), (100, 50), fill="black")
-canvas.create_line((150,0), (150, 50), fill="black")
-canvas.create_line((200,0), (200, 50), fill="black")
-canvas.create_line((250,0), (250, 50), fill="black")
-canvas.create_line((300,0), (300, 50), fill="black")
-canvas.create_line((350,0), (350, 50), fill="black")
 canvas.pack()
-win.bind("<KeyPress>", move_by_keys)
-win.mainloop()
+prepare_and_start()
+master.bind("<KeyPress>", key_pressed)
+master.mainloop()
